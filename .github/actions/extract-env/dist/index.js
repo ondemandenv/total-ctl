@@ -177,9 +177,9 @@ function resolveConfig(branch) {
     };
     // This configuration points to your sandbox/development AWS account.
     const developmentConfig = {
-        env: 'default-dev', // This default name is overridden for dynamic environments
+        env: 'default-sbx', // This default name is overridden for dynamic environments
         region: 'us-west-2',
-        roleArn: 'arn:aws:iam::682794873457:role/total-ctl-infra-sandbox-GithubActionsDeployRole3AEB-59VstfyutSjB' // Development/Sandbox Role ARN
+        roleArn: 'arn:aws:iam::682794873457:role/total-ctl-infra-sandbox-GithubActionsDeployRole3AEB-NUZeFwrCLCcH' // Development/Sandbox Role ARN
     };
     // --- End of Hardcoded Configuration ---
     let config;

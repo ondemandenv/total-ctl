@@ -9,5 +9,4 @@ front-end/build/*
 **/.idea
 **/cdk.out
 
-
 **/.env

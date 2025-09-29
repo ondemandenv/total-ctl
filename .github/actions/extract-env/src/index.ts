@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 import * as fs from 'fs';
 
+// Import the shared environment naming utility (single source of truth in CDK)
+const { getEnvironmentNameForBranch } = require('../../../../aws-cdk/bin/branch-env-name.js');
+
 // Optional: use @actions/core when available for better DX; fall back otherwise.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let core: any | undefined;
@@ -148,24 +151,6 @@ function getAccountIdFromArn(arn: string): string | undefined {
 }
 
 /**
- * Sanitizes a git branch name to create a valid environment name.
- * Replaces slashes and other non-alphanumeric characters with hyphens,
- * converts to lowercase, and truncates to a reasonable length.
- * @param branch The raw git branch name.
- * @returns A sanitized string suitable for use as an environment name.
- */
-function sanitizeBranchName(branch: string): string {
-    const sanitized = branch
-        .toLowerCase()
-        .replace(/[^a-z0-9-]/g, '-') // Replace non-alphanumeric chars (except hyphen) with hyphen
-        .replace(/--+/g, '-')       // Collapse consecutive hyphens
-        .replace(/^-+|-+$/g, '');   // Trim leading/trailing hyphens
-
-    // Truncate to a reasonable length for environment names
-    return sanitized.substring(0, 50);
-}
-
-/**
  * Resolves the final configuration based on the current branch and a hardcoded mapping.
  * This uses a feature-branch workflow: `main` maps to production, and all other
  * branches (e.g., `feature/*`, `bugfix/*`) map to a dynamic environment that uses
@@ -187,9 +172,9 @@ function resolveConfig(branch: string): ResolvedConfig {
 
     // This configuration points to your sandbox/development AWS account.
     const developmentConfig: EnvironmentConfig = {
-        env: 'default-dev', // This default name is overridden for dynamic environments
+        env: 'default-sbx', // This default name is overridden for dynamic environments
         region: 'us-west-2',
-        roleArn: 'arn:aws:iam::682794873457:role/total-ctl-infra-sandbox-GithubActionsDeployRole3AEB-59VstfyutSjB' // Development/Sandbox Role ARN
+        roleArn: 'arn:aws:iam::682794873457:role/total-ctl-infra-sandbox-GithubActionsDeployRole3AEB-NUZeFwrCLCcH' // Development/Sandbox Role ARN
     };
     // --- End of Hardcoded Configuration ---
 
@@ -204,12 +189,12 @@ function resolveConfig(branch: string): ResolvedConfig {
     } else if (branch.startsWith('prod/') || branch.startsWith('hotfix/')) {
         logDebug(`Branch '${branch}' matches a production prefix. Creating a DYNAMIC environment in the PRODUCTION account.`);
         config = productionConfig; // Target the Production Account
-        envName = sanitizeBranchName(branch); // But use a dynamic name
+        envName = getEnvironmentNameForBranch(branch); // Use shared sanitization logic
 
     } else {
         logDebug(`Branch '${branch}' is a standard feature branch. Creating a DYNAMIC environment in the DEVELOPMENT account.`);
         config = developmentConfig; // Target the Development Account
-        envName = sanitizeBranchName(branch); // With a dynamic name
+        envName = getEnvironmentNameForBranch(branch); // Use shared sanitization logic
     }
 
     const accountId = getAccountIdFromArn(config.roleArn);

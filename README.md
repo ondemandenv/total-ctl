@@ -1147,35 +1147,18 @@ Ephemeral environments should not live forever. When your Pull Request is merged
 
 This job simply runs `cdk destroy` with the same environment name (`env=feature-new-recommendation-engine`), which tears down every resource associated with that environment. This ensures the sandbox account stays clean and costs are minimized.
 
-## Known Implementation Issues
-
-### Environment Derivation Mismatch
-
-**Critical Issue**: There is a fundamental mismatch in how environment names are derived between CDK and GitHub Actions:
-
-- **CDK approach** (`bin/cdk.ts`): Uses raw Git branch name: `feature/new-login`
-- **GitHub Actions approach**: Uses sanitized name from `extract-env`: `feature-new-login`
-
-This causes stack naming conflicts where:
-- CDK tries to create: `total-ctl-infra-feature/new-login`
-- Workflows expect: `total-ctl-infra-feature-new-login`
-
-**Current Status**: This is a reference implementation issue that needs resolution for production use.
-
-### GitHub Action Interface Gap
-
-The `extract-env` action defines `mapping_json` input but doesn't implement it. All configuration is currently hardcoded in `src/index.ts`.
-
 ## How It Works: The 30-Second Overview
 
 **Remember**: This is the *hard case* - complete VPC + database cluster + monitoring stack per branch.
 
 1.  A developer pushes a new branch (e.g., `feature/new-login`).
 2.  A GitHub Actions workflow is triggered.
-3.  The `extract-env` action runs, determines the target AWS account (Dev), and generates a unique environment name (`feature-new-login`).
-4.  The pipeline assumes the correct AWS role and passes the unique environment name to the CDK.
-5.  The CDK application deploys a **brand new, fully isolated stack** including VPC, DocumentDB cluster, ECS cluster, CloudFront distribution, and all supporting infrastructure.
+3.  The `extract-env` action runs, determines the target AWS account (Dev), and generates a consistent environment name (`feature-new-login`) using the shared naming utility.
+4.  The pipeline assumes the correct AWS role and passes the environment name to the CDK.
+5.  The CDK application uses the same shared naming utility to deploy a **brand new, fully isolated stack** including VPC, DocumentDB cluster, ECS cluster, CloudFront distribution, and all supporting infrastructure.
 6.  **Result**: A complete production-like environment running in 8-12 minutes, automatically cleaned up when the branch is deleted.
+
+**Consistency**: Both the CDK and GitHub Actions use the same environment naming utility (`aws-cdk/bin/branch-env-name.js`) as the single source of truth for identical environment naming.
 
 **If this works for the complex case, imagine how fast it is for simple Lambda functions or static sites.**
 

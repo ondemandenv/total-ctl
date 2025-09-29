@@ -7,13 +7,17 @@ import {FrontendStack} from '../lib/frontend-stack';
 import {CustomDomainDistributionStack} from '../lib/custom-domain-distribution-stack';
 import {EC2Stack} from '../lib/ec2-stack';
 import {CustomDomainConfigLoader} from '../lib/utils/custom-domain-config';
-import {execSync} from "child_process";
+
+// Import the shared environment naming utility (local copy)
+const { getEnvironmentName } = require('./branch-env-name.js');
 
 const app = new cdk.App();
 
 const region = process.env.CDK_DEFAULT_REGION!;
 const account = process.env.CDK_DEFAULT_ACCOUNT!;
-const environment = execSync('git rev-parse --abbrev-ref HEAD').toString().trim();
+
+// Use consistent environment naming with extract-env action
+const environment = getEnvironmentName();
 
 console.log(`Deploying to environment: ${environment}`);
 console.log(`AWS Region: ${region}`);

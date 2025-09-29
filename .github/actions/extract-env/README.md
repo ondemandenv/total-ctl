@@ -65,43 +65,51 @@ jobs:
 
 ### Environment Name Derivation
 
-**Critical**: There is currently a mismatch in how environment names are derived:
+### Implementation Notes
 
-- **CDK (`bin/cdk.ts`)**: Uses the raw Git branch name directly via `execSync('git rev-parse --abbrev-ref HEAD')`
-- **GitHub Actions workflows**: Use the sanitized environment name from the `extract-env` action
+## Environment Naming Consistency
 
-This means:
-- For branch `feature/new-login`, CDK expects stack name `total-ctl-infra-feature/new-login` 
-- But workflows attempt to deploy to `total-ctl-infra-feature-new-login`
+The system uses a single source of truth for environment naming located in the CDK:
 
-**Workaround**: The system currently works when run from a local environment where the CDK uses the actual Git branch name. The workflows may need adjustment to pass the environment name to CDK via context or environment variables.
+- **Single Source**: `aws-cdk/bin/branch-env-name.js`
+- **CDK imports**: Local require in `cdk.ts`
+- **GitHub Action imports**: `../../../../aws-cdk/bin/branch-env-name.js`
 
-### GitHub Action Interface
+This ensures both systems use identical logic to convert branch names to valid AWS CloudFormation stack names.
 
-The `extract-env` action currently uses hardcoded configuration in `src/index.ts` and **ignores** the `mapping_json` input, despite it being defined in `action.yml` and used by workflows. This is a reference implementation pattern where the JSON mapping would be implemented in a production environment.
+### GitHub Action Configuration
 
-To configure the routing rules, edit the hardcoded AWS account targets in `src/index.ts`:
+The `extract-env` action currently uses hardcoded configuration in `src/index.ts` and **ignores** the `mapping_json` input, despite it being defined in `action.yml`. This is a reference implementation pattern.
+
+**Actual Hardcoded Configuration** (from `src/index.ts`):
 
 ```typescript
-// src/index.ts
-
-// This configuration points to your stable, production AWS account.
-// It is used for the 'main' branch AND for dynamic 'prod/*' or 'hotfix/*' branches.
+// Production configuration (used for 'main' branch and 'prod/*', 'hotfix/*' branches)
 const productionConfig: EnvironmentConfig = {
-  env: 'customer-facing', // The static name for the primary production environment
-  region: 'us-east-1',
+  env: 'customer-facing',
+  region: 'us-east-1', 
   roleArn: 'arn:aws:iam::111111111111:role/github-actions-deploy-role'
 };
 
-// This configuration points to your sandbox/development AWS account.
-// It is used for all standard development branches (e.g., 'feature/*').
+// Development configuration (used for all other branches)
 const developmentConfig: EnvironmentConfig = {
-  env: 'default-dev', // This name is overridden by the dynamic branch name
+  env: 'default-sbx',
   region: 'us-west-2',
-  roleArn: 'arn:aws:iam::682794873457:role/total-ctl-infra-sandbox-GithubActionsDeployRole3AEB-59VstfyutSjB'
+  roleArn: 'arn:aws:iam::682794873457:role/total-ctl-infra-sandbox-GithubActionsDeployRole3AEB-NUZeFwrCLCcH'
 };
+```
+
+**Note**: The production role ARN contains a placeholder account ID (`111111111111`) and would need to be updated with actual production account details during initialization.
 ```
 
 ### Additional Notes
 
-**Package Scripts**: The `cdk-deploy-infra` script in `aws-cdk/package.json` uses a hardcoded environment name `sandbox` for local development. In production, the CDK deployment should use the dynamic environment name derived from the Git branch or passed via the GitHub Actions workflow.
+**Package Scripts**: The `cdk-deploy-infra` script in `aws-cdk/package.json` uses a hardcoded environment name `sandbox` for local development. For dynamic environments, use the shared environment naming utility:
+
+```bash
+# Get environment name for current branch
+node aws-cdk/bin/branch-env-name.js
+
+# Deploy with dynamic environment name  
+cdk deploy total-ctl-infra-$(node aws-cdk/bin/branch-env-name.js)
+```

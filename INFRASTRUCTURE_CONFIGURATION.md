@@ -76,9 +76,11 @@ CDK_FORCE_IN_MEMORY=true cdk deploy total-ctl-infra-prod-testing
 ### Environment-Based Auto-Detection
 ```bash
 # Production environments automatically get DocumentDB
+# Uses single source of truth for consistent environment detection
 cdk deploy total-ctl-infra-main
 
 # Feature environments automatically get in-memory
+# Environment name derived from: aws-cdk/bin/branch-env-name.js
 cdk deploy total-ctl-infra-feature-new-api
 ```
 

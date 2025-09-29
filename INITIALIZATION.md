@@ -103,7 +103,7 @@ const productionConfig: EnvironmentConfig = {
 const developmentConfig: EnvironmentConfig = {
   env: 'default-dev',
   region: 'DEV_REGION', // e.g., 'us-west-2'
-  roleArn: 'arn:aws:iam::682794873457:role/total-ctl-infra-sandbox-GithubActionsDeployRole3AEB-59VstfyutSjB' // <-- PASTE ARN FROM STEP 2.2
+  roleArn: 'arn:aws:iam::682794873457:role/total-ctl-infra-sandbox-GithubActionsDeployRole3AEB-XXXXXXXXXX' // <-- PASTE ARN FROM STEP 2.2
 };
 ```
 
@@ -121,4 +121,6 @@ git push
 
 ## ✅ Initialization Complete
 
-From this point forward, the CI/CD pipeline is fully autonomous. When a workflow runs, the `extract-env` action will provide the correct, pre-existing role ARN for the pipeline to assume. The system will now manage its own infrastructure, including the very roles it uses for deployment.
+From this point forward, the CI/CD pipeline is fully autonomous. When a workflow runs, the `extract-env` action will provide the correct, pre-existing role ARN for the pipeline to assume. Both the GitHub Actions and CDK use the same environment naming utility (`aws-cdk/bin/branch-env-name.js`) as the single source of truth to ensure consistent stack names across all deployments.
+
+The system will now manage its own infrastructure, including the very roles it uses for deployment.

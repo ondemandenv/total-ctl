@@ -211,7 +211,8 @@ npm start
 
 ### Environment Auto-Detection (Default)
 ```bash
-# Will automatically choose based on environment
+# Will automatically choose based on environment name
+# Uses single source of truth: aws-cdk/bin/branch-env-name.js
 # Production branches → DocumentDB
 # Feature branches → In-Memory
 npm start
