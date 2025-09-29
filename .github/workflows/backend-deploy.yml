@@ -1,0 +1,103 @@
+name: Backend Deployment
+
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - '**'
+    paths:
+      - 'back-end/**'
+  pull_request:
+    branches:
+      - '**'
+    paths:
+      - 'back-end/**'
+
+jobs:
+  deploy:
+    name: Deploy Backend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Extract Account/Region from Branch
+        id: envmap
+        uses: ./.github/actions/extract-env
+        with:
+          branch: ${{ github.ref_name }}
+          mapping_json: ${{ vars.BRANCH_TO_CONFIG }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Load backend parameters from Parameter Store
+        run: |
+          # Set the parameter path prefix
+          PARAM_PREFIX="/total-ctl/${{ env.ENVIRONMENT }}"
+          echo "Loading ecr-repoName from $PARAM_PREFIX"
+          
+          BACKEND_ECR_REPOSITORY=$(aws ssm get-parameter --name "$PARAM_PREFIX/backend/ecr-repoName" --region ${{ env.AWS_REGION }} --query "Parameter.Value" --output text)
+          echo "BACKEND_ECR_REPOSITORY=$BACKEND_ECR_REPOSITORY" >> $GITHUB_ENV
+          echo "Found existing ECR repository: $BACKEND_ECR_REPOSITORY"
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          ls -ltarh
+          cd back-end
+          
+          # Build and push the Docker image
+          docker build -t $ECR_REGISTRY/${{ env.BACKEND_ECR_REPOSITORY }}:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/${{ env.BACKEND_ECR_REPOSITORY }}:$IMAGE_TAG
+          echo "image_uri=$ECR_REGISTRY/${{ env.BACKEND_ECR_REPOSITORY }}:$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
+          
+          # Tag the same image as 'latest' and push it
+          docker tag $ECR_REGISTRY/${{ env.BACKEND_ECR_REPOSITORY }}:$IMAGE_TAG $ECR_REGISTRY/${{ env.BACKEND_ECR_REPOSITORY }}:latest
+          docker push $ECR_REGISTRY/${{ env.BACKEND_ECR_REPOSITORY }}:latest
+
+      - name: Update image tag in Parameter Store
+        run: |
+          # Update the image tag parameter in SSM
+          PARAM_PREFIX="/total-ctl/${{ env.ENVIRONMENT }}"
+          aws ssm put-parameter \
+            --name "$PARAM_PREFIX/backend/ecr-imgTag" \
+            --value "${{ steps.build-image.outputs.image_tag }}" \
+            --type String \
+            --overwrite \
+            --region ${{ env.AWS_REGION }}
+          
+          echo "Updated image tag in Parameter Store to: ${{ steps.build-image.outputs.image_tag }}"
+
+      - name: Deploy backend stack
+        run: |
+          npm install -g aws-cdk
+          cdk --version
+          cd aws-cdk
+          pwd
+          npm install
+          ls -ltarh
+          cdk deploy "total-ctl-backend-${{ env.ENVIRONMENT }}" --require-approval never
+          echo "Backend stack successfully deployed with new image: ${{ steps.build-image.outputs.image_tag }}" 

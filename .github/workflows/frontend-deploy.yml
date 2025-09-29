@@ -1,0 +1,69 @@
+name: Frontend Deployment
+
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - '**'
+    paths:
+      - 'front-end/**'
+  pull_request:
+    branches:
+      - '**'
+    paths:
+      - 'front-end/**'
+
+jobs:
+  deploy:
+    name: Deploy Frontend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Extract Account/Region from Branch
+        id: envmap
+        uses: ./.github/actions/extract-env
+        with:
+          branch: ${{ github.ref_name }}
+          mapping_json: ${{ vars.BRANCH_TO_CONFIG }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Build
+        run: |
+          pwd
+          ls -ltarh
+          cd front-end
+          npm install
+          npm run build
+          ls -ltarh
+
+      - name: Deploy to S3 with CDK
+        run: |
+          set -ex
+          npm install -g aws-cdk
+          cdk --version
+          cd aws-cdk
+          pwd
+          npm install
+          ls -ltarh
+          ls -ltarh ../front-end
+          du -sh ../front-end/build
+          cdk deploy "total-ctl-frontend-${{ env.ENVIRONMENT }}" --exclusively --no-rollback --require-approval never
+          echo "Frontend stack successfully deployed!"

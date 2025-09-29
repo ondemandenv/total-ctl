@@ -1,0 +1,13 @@
+# Ignore the build directory contents...
+front-end/build/*
+
+# ...but DO NOT ignore the placeholder file inside it
+!front-end/build/_dummy_placeholder.txt
+
+**/node_modules
+**/.vscode
+**/.idea
+**/cdk.out
+
+
+**/.env

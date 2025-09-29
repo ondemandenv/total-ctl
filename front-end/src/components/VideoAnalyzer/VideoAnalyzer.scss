@@ -1,0 +1,231 @@
+.video-analyzer {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+.analyzer-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+}
+.upload-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+.video-info {
+  display: flex;
+  gap: 20px;
+  font-size: 14px;
+  color: #666;
+}
+.results-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+input:checked + .toggle-slider {
+  background-color: #007bff;
+}
+input:disabled + .toggle-slider {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+input:checked + .toggle-slider:before {
+  transform: translateX(26px);
+}
+.toggle-label {
+  font-size: 14px;
+  color: #666;
+}
+.error {
+  color: #dc3545;
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 4px;
+  background-color: rgba(220, 53, 69, 0.1);
+}
+.upload-button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+.upload-button:hover:not(:disabled) {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+}
+.upload-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+.processing-status {
+  width: 100%;
+  max-width: 400px;
+  margin: 20px 0;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.status-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: #666;
+  }
+  
+  .status-label {
+  font-weight: 600;
+  min-width: 120px;
+  }
+  
+  .status-value {
+  color: #666;
+  }
+.progress-bar {
+  width: 100%;
+  height: 4px;
+  background-color: #e9ecef;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 10px;
+  }
+  
+  .progress-bar.small {
+  width: 100px;
+  height: 2px;
+  margin-left: 10px;
+  display: inline-block;
+  vertical-align: middle;
+  }
+  
+  .progress-bar-fill {
+  height: 100%;
+  background-color: #007bff;
+  transition: width 0.5s ease;
+  }
+.results {
+  width: 100%;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.timing-results {
+  background-color: #f8f9fa;
+  border-left: 4px solid #007bff;
+}
+.results h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 18px;
+}
+.results ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  color: black;
+}
+.results li {
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+.transcription-text {
+  white-space: pre-wrap;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+.language-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+.language-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background-color: #ffc107; /* Yellow for lower confidence */
+  color: #000;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  }
+  
+  .language-tag.high-confidence {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .language-tag.high-confidence {
+    background-color: #007bff; /* Blue for highest confidence */
+    color: white;
+    }
+.confidence-warning {
+  display: none;
+  }
+.severity-high {
+  color: #dc3545;
+  font-weight: 600;
+}
+.severity-medium {
+  color: #ffc107;
+  font-weight: 500;
+}
+.severity-low {
+  color: #28a745;
+}

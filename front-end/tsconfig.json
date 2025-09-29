@@ -1,0 +1,39 @@
+{
+    "compilerOptions": {
+        "target": "ES2020",
+        "useDefineForClassFields": true,
+        "lib": ["ES2020", "DOM", "DOM.Iterable"],
+        "module": "ESNext",
+        "skipLibCheck": true,
+        "noImplicitAny": false,
+
+        /* Bundler mode */
+        "moduleResolution": "node",
+        "allowSyntheticDefaultImports": true,
+        "allowImportingTsExtensions": true,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "noEmit": true,
+        "jsx": "react-jsx",
+
+        /* Linting */
+        "strict": false,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
+        "noFallthroughCasesInSwitch": true
+    },
+    "include": [
+        "src/vite-env.d.ts",
+        "src/Index.tsx",
+        "src/App.tsx",
+        "src/componets/VideoAnalyzer/**/*.ts",
+        "src/componets/VideoAnalyzer/**/*.tsx",
+        "src/services/content-analysis.service.ts",
+        "src/services/moderation.service.ts",
+        "src/services/s3.service.ts",
+        "src/services/transcription.service.ts",
+        "src/types/**/*.ts",
+        "src/utils/Moderation/**/*.ts"
+    ],
+    "references": [{ "path": "./tsconfig.node.json" }]
+}

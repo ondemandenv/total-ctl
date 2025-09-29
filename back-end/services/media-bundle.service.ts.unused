@@ -1,0 +1,24 @@
+import { HologramService } from './hologram-service';
+import { S3StorageService } from './s3-service';
+
+export class MediaBundleService {
+  constructor(
+    private readonly hologramService: HologramService,
+    private readonly s3Service: S3StorageService
+  ) {}
+
+  public async getBundleByBundleId(bundleId: string) {
+    const hologram = await this.hologramService.getHologram(bundleId);
+
+    const videoUrl = await this.s3Service.getFileS3byBundleId(`${bundleId}.mp4`);
+    const meshUrl = await this.s3Service.getFileS3byBundleId(`${bundleId}.glb`);
+    // Increment views of the hologram
+    await this.hologramService.incrementViews(bundleId);
+    return {
+      bundleId,
+      videoUrl,
+      meshUrl,
+      hologram,
+    };
+  }
+}

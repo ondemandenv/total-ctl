@@ -1,0 +1,36 @@
+name: Extract Env From Branch
+description: Map branch name to environment, account and region using provided JSON mapping
+inputs:
+  branch:
+    description: Git ref name (e.g. main, stage, feature/x)
+    required: true
+  mapping_json:
+    description: JSON mapping stored in a repo/org variable (e.g. BRANCH_TO_CONFIG)
+    required: true
+  default_env:
+    description: Default environment if branch not found
+    required: false
+    default: dev
+  default_account_id:
+    description: Default AWS account id if not found (optional)
+    required: false
+    default: ""
+  default_region:
+    description: Default AWS region if not found (optional)
+    required: false
+  default_role_arn:
+    description: Default GitHub Actions role ARN if not found (optional)
+    required: false
+    default: ""
+runs:
+  using: node20
+  main: dist/index.js
+outputs:
+  env:
+    description: Resolved environment
+  account_id:
+    description: Resolved AWS account id
+  region:
+    description: Resolved AWS region
+  role_arn:
+    description: Resolved GitHub Actions role ARN

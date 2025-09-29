@@ -1,0 +1,16 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  text-align: center;
+  z-index: 100;
+}
+
+.intro-card {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  button {
+    margin: .5em;
+  }
+}
+

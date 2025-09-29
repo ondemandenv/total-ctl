@@ -1,0 +1,120 @@
+import User, { type IUser, type IUserResponse } from '../models/user.model';
+import Role, { type IRole } from '../models/role.model';
+import jwt from 'jsonwebtoken';
+import { Types } from 'mongoose';
+import type { CredentialService } from './credential-service';
+
+const SUPERADMIN_EMAILS = ['admin@total-ctl.com'];
+
+export class UserService {
+  credentialsService: CredentialService;
+  private JWT_SECRET;
+
+  constructor ( credentialsService: CredentialService ){
+    this.credentialsService = credentialsService;
+    this.JWT_SECRET = credentialsService.apiKeySecret;
+  }
+
+  public async signup(email: string, username: string, password: string): Promise<{ user: IUserResponse; token: string }> {
+    const newUser = new User({ email, username, password, roles: [] });
+    // If the email is designated for superadmin, assign that role.
+    if (SUPERADMIN_EMAILS.includes(email)) {
+      let superadminRole = await Role.findOne({ name: 'superadmin' });
+      if (!superadminRole) {
+        // Create a new role for superadmin if it does not exist.
+        superadminRole = new Role({ name: 'superadmin', description: 'Super Administrator role' });
+        await superadminRole.save();
+      }
+      newUser.roles.push(superadminRole._id as Types.ObjectId);
+    }
+    const newUserCreated = await newUser.save();
+    // Convert to plain object
+    const userObj = newUserCreated.toObject() as IUserResponse & { password: string };
+    // Destructure to remove the password field.
+    const { password: _removed, ...userWithoutPassword } = userObj;
+    const token = jwt.sign(
+      { userId: userObj._id, roles: userObj.roles },
+      this.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    return { user: userWithoutPassword, token };
+  }
+
+  public async login(email: string, password: string): Promise<{ user: IUserResponse; token: string }> {
+    // Find user with password. Since select is false, include it explicitly:
+    const user = await User.findOne({ email }).select('+password').populate('roles');
+    if (!user) {
+      throw new Error("Invalid credentials");
+    }
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      throw new Error("Invalid credentials");
+    }
+    // Convert to plain object
+    const userObj = user.toObject() as IUserResponse & { password: string };
+    // Destructure to remove the password field.
+    const { password: _removed, ...userWithoutPassword } = userObj;
+    const token = jwt.sign(
+      { userId: userObj._id, roles: userObj.roles },
+      this.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+    return { user: userWithoutPassword, token };
+  }
+
+  public async getUserById(userId: string): Promise<IUser | null> {
+    return await User.findById(userId).populate('roles');
+  }
+
+  public async getUserByName(username: string): Promise<IUser | null> {
+    return await User.findOne({username}).populate('roles');
+  }
+
+  public async getAllRoles(): Promise<IRole[]> {
+    return await Role.find();
+  }
+
+  // Assign a role to a user.
+  public async assignRoleToUser(userId: string, roleId: string): Promise<IUser> {
+    const role = await Role.findOne({ _id: roleId });
+    if (!role) {
+      throw new Error(`Role ${roleId} not found`);
+    }
+    const user = await User.findByIdAndUpdate(userId, { $addToSet: { roles: role._id } }, { new: true }).populate('roles');
+    if (!user) {
+      throw new Error("User not found");
+    }
+    return user;
+  }
+
+  // Remove a role from a user.
+  public async removeRoleFromUser(userId: string, roleName: string): Promise<IUser> {
+    const role = await Role.findOne({ name: roleName });
+    if (!role) {
+      throw new Error(`Role ${roleName} not found`);
+    }
+    const user = await User.findByIdAndUpdate(userId, { $pull: { roles: role._id } }, { new: true }).populate('roles');
+    if (!user) {
+      throw new Error("User not found");
+    }
+    return user;
+  }
+
+  // Delete a role
+  public async deleteRole(roleId: string): Promise<IRole | null> {
+    const deletedRole = await Role.findByIdAndDelete(roleId);
+    if (!deletedRole) {
+      throw new Error("Role not found");
+    }
+    // Remove the deleted role's _id from all users who have it assigned.
+    await User.updateMany({ roles: roleId }, { $pull: { roles: roleId } });
+    return deletedRole;
+  }
+
+  // Create a new role.
+  public async createRole(roleData: Partial<IRole>): Promise<IRole> {
+    const newRole = await Role.create(roleData);
+    return newRole;
+  }
+}

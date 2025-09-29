@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, maximum-scale=1.1" />
+        <title>Total Ctl</title>
+        <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+        <style>
+            @keyframes spin {
+                to {
+                transform: rotate(1turn);
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div id="root">
+            <div
+                style="
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 100vw;
+                height: 100vh;
+                background-color: #000;
+                margin: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                "
+            >
+            </div>
+        </div>
+        <script
+            type="module"
+            src="/src/Index.tsx"></script>
+    </body>
+</html>
