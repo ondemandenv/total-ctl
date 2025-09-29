@@ -10,6 +10,7 @@
     "watch": "tsc -w",
     "test": "jest",
     "cdk-ls": "cdk --version && cdk ls",
+    "cdk-diff": "cdk --version && cdk diff",
     "cdk-deploy-infra": "tsc && cdk deploy total-ctl-infra-sandbox --no-rollback"
   },
   "devDependencies": {

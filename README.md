@@ -18,6 +18,8 @@
 | **Container Registry** | Dedicated ECR repository per environment | Shared registry with tag management complexity |
 | **Secrets Management** | AWS Secrets Manager + Parameter Store per environment | Kubernetes secrets + external secret operators |
 
+![img.png](img.png)
+
 **The Kubernetes Tradeoff**: Shared infrastructure is "efficient" but creates operational complexity, resource conflicts, and limits true isolation. This architecture chooses isolated simplicity over shared complexity.
 
 ## "You Can't Win a Race by Committee" - The Speed Advantage

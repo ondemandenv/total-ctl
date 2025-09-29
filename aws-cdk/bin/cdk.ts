@@ -7,6 +7,7 @@ import {FrontendStack} from '../lib/frontend-stack';
 import {CustomDomainDistributionStack} from '../lib/custom-domain-distribution-stack';
 import {EC2Stack} from '../lib/ec2-stack';
 import {CustomDomainConfigLoader} from '../lib/utils/custom-domain-config';
+import {execSync} from "child_process";
 
 // Import the shared environment naming utility (local copy)
 const { getEnvironmentName } = require('./branch-env-name.js');
