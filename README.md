@@ -190,7 +190,7 @@ Day 16:  Load balancer fixed, ready for prod (if environment still consistent)
 ```
 Day 1:  Developer starts feature, git push creates complete environment
 Day 2:  Feature complete, tested in production-like environment  
-Day 3:  Deploy to main branch, cleanup ephemeral environment
+Day 3:  Deploy to main branch, cleanup dynamic environment
 ```
 **Total: 3 days, zero tickets, zero dependencies**
 
@@ -393,7 +393,7 @@ This project is built on several advanced concepts that, when combined, create a
 
 2.  **Two-Level Configuration**: A powerful separation of concerns between the **Auth/Bootstrap Layer (Level 1)** and the **Application/Business Logic Layer (Level 2)**. This action handles Level 1, determining *where* to deploy, while your CDK application code handles Level 2, defining *what* to deploy. **AI agents can operate at both levels** - modifying infrastructure patterns and business logic independently.
 
-3.  **Multi-Account Dynamic Environments**: The system uses a convention-based routing model to deploy environments to the correct AWS account. Standard `feature/*` branches are safely deployed to a Development account, while special `prod/*` or `hotfix/*` branches can be deployed as ephemeral environments into the Production account for high-fidelity testing. **AI agents follow the same routing rules**, ensuring safe experimentation boundaries.
+3.  **Multi-Account Dynamic Environments**: The system uses a convention-based routing model to deploy environments to the correct AWS account. Standard `feature/*` branches are safely deployed to a Development account, while special `prod/*` or `hotfix/*` branches can be deployed as dynamic environments into the Production account for high-fidelity testing. **AI agents follow the same routing rules**, ensuring safe experimentation boundaries.
 
 4.  **Decoupled Communication via Parameter Store**: To enable true decoupling between different parts of the system (e.g., a backend service CI pipeline, an AI optimization agent, and an infrastructure CD pipeline), this architecture uses **AWS SSM Parameter Store** as a configuration bus. By adopting a consistent naming convention, different agents can communicate asynchronously. The parameter path structure is:
 
@@ -1055,7 +1055,7 @@ This architecture solves this problem by using a **real programming language (Ty
 - CloudFront distribution: Pay-per-use
 - **Total: ~$0.31/hour per environment** (~$225/month if left running)
 
-**But here's the key**: These are *ephemeral environments*. A feature branch that lives for 3 days costs ~$22. The value of having a complete, isolated environment for testing, QA, and stakeholder review easily justifies this cost.
+**But here's the key**: These are *on-demand environments*. A feature branch that lives for 3 days costs ~$22. The value of having a complete, isolated environment for testing, QA, and stakeholder review easily justifies this cost.
 
 Compare this to the **hidden costs of Kubernetes**:
 - Platform team salaries ($150K+ engineers managing YAML sprawl)
@@ -1081,7 +1081,7 @@ This architecture, by using a true infrastructure-as-code approach with a real p
 
 ## Comparison to the GitOps Model
 
-This architecture shares philosophical roots with the GitOps model but extends its principles in a way that is specifically tailored for full-stack, ephemeral environments.
+This architecture shares philosophical roots with the GitOps model but extends its principles in a way that is specifically tailored for full-stack, on-demand environments.
 
 **GitOps, in essence, is a framework for continuous deployment that uses Git as the single source of truth for declarative infrastructure and applications.** An automated agent (like Argo CD or Flux) ensures that the live environment mirrors the state defined in the repository.
 
@@ -1099,7 +1099,7 @@ The primary difference lies in the **scope of control** and the **operational mo
 | :-------------------- | :---------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------- |
 | **Scope of Control**    | Typically manages application state *within* a pre-existing, centrally managed cluster (e.g., Kubernetes). | Manages the **entire, full-stack environment**, from the VPC and database up to the application, as a single, atomic unit. |
 | **Operational Model**   | **Pull-based.** An in-cluster operator continuously pulls the desired state from Git and reconciles the live environment. | **Push-based.** A CI/CD pipeline (GitHub Actions) is triggered by a Git event and pushes the required changes to the environment (e.g., via `cdk deploy`). |
-| **Environment Lifecycle** | Excels at managing a few, long-lived environments (e.g., dev, staging, prod). | Fundamentally designed for a large number of **ephemeral, branch-level environments**. The entire workflow is optimized for their rapid creation and destruction. |
+| **Environment Lifecycle** | Excels at managing a few, long-lived environments (e.g., dev, staging, prod). | Fundamentally designed for a large number of **on-demand, branch-level environments**. The entire workflow is optimized for their rapid creation and destruction. |
 | **The "Agent"**         | A persistent, in-cluster software agent (e.g., Argo CD).                 | A transient CI/CD job (e.g., a GitHub Actions runner).                                                                  |
 
 In summary, while standard GitOps focuses on "What is the state of the application *in this cluster*?", this architecture asks, "What is the state of the *entire system for this branch*?". It takes the principle of "infrastructure as code" to its logical conclusion by empowering developers to define and provision not just their application, but the entire stack it runs on, for every single feature they build.
@@ -1131,7 +1131,7 @@ The `git push` triggers the CI/CD workflow in GitHub Actions, which performs two
 
 2.  **Deployment (The Level 2 Model)**: The workflow passes this unique name (`env=feature-new-recommendation-engine`) to your CDK application. The CDK code uses this key to synthesize and deploy a **brand new, fully isolated stack of AWS resources** (APIs, databases, etc.), all named with the `feature-new-recommendation-engine` suffix.
 
-Within minutes, a complete, ephemeral environment is created and ready.
+Within minutes, a complete, on-demand environment is created and ready.
 
 #### Step 3: Measurement & Discovery (The Feedback Loop)
 
@@ -1145,7 +1145,7 @@ This process of getting a real, working system into the hands of stakeholders ac
 
 #### Step 4: Cleanup (Automated Teardown)
 
-Ephemeral environments should not live forever. When your Pull Request is merged or closed, an automated cleanup job is triggered.
+On-demand environments should not live forever. When your Pull Request is merged or closed, an automated cleanup job is triggered.
 
 This job simply runs `cdk destroy` with the same environment name (`env=feature-new-recommendation-engine`), which tears down every resource associated with that environment. This ensures the sandbox account stays clean and costs are minimized.
 
@@ -1185,6 +1185,39 @@ This repository requires a one-time setup process to bootstrap your AWS accounts
     git checkout -b feature/my-first-env
     git push -u origin feature/my-first-env
     ```
+
+## Framework Philosophy and Branching Strategy
+
+### ⚠️ Important: This is a Framework, Not an Out-of-the-Box Tool
+
+It is crucial to understand that this repository provides a **framework** for building a dynamic environment system, not a turnkey solution. You will need to customize the infrastructure code (CDK), CI/CD pipelines (GitHub Actions), and configuration to fit the specific needs of your project. This is by design. The power of this architecture lies in its adaptability, allowing you to define exactly what an "environment" means for your application.
+
+### Branching Strategy for Dynamic Environments
+
+This framework enables a "branch as environment" model. While short-lived feature branches are a primary use case, this approach is powerful enough to support long-lived, shared environments as well. This branching strategy has been battle-tested across multiple projects with great success.
+
+The recommended strategy is to use descriptive, long-lived branch names that are frequently synchronized (merged and reset) with the main branch to avoid drift.
+
+#### Environment-as-a-Branch Naming Conventions
+
+1.  **Business-Purpose Branches**: For shared, persistent environments that serve a specific business function.
+    *   `sandbox`
+    *   `qa1`, `qa2`
+    *   `staging1`, `staging2`, `staging3`
+    *   `prod1`, `prod2`, `prod3` (For blue/green deployments or regional instances)
+
+2.  **Developer-Owned Branches**: For individual developer or QA engineer sandboxes. This gives every team member their own isolated environment for development and testing.
+    *   `dev-gary-1`, `dev-gary-2`
+    *   `qa-jack-1`, `qa-jack-2`, `qa-jack-3`
+
+#### Workflow for Long-Lived Branches
+
+Long-lived branches like `qa1` or `staging1` should be treated as independent environments that are regularly updated from `main`.
+
+1.  **Synchronization**: To prevent configuration drift, these branches should be frequently updated from the `main` branch. A common practice is to have a scheduled job that merges `main` into these branches daily.
+2.  **Resetting**: If an environment becomes unstable, the easiest solution is often to reset it by force-pushing the latest `main` branch to it, which triggers a fresh deployment.
+
+This battle-tested framework provides the flexibility to manage everything from on-demand feature branches to stable, long-lived production environments, all through the same powerful and consistent Git-based workflow.
 
 ## Further Reading
 
