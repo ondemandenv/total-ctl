@@ -3,9 +3,12 @@
 ## **The Methodology Foundation: OnDemandEnv.dev**
 
 > **📖 This is the simplified open-source version of [OnDemandEnv.dev](https://ondemandenv.dev)**  
-> **🔬 For complete methodology and analysis, see [OnDemandEnv Articles](https://ondemandenv.dev/articles.html)**
+> **🔬 For complete methodology and analysis, see [OnDemandEnv Articles](https://ondemandenv.dev/articles.html)**  
+> **🏗️ This repository demonstrates infrastructure for a single service as part of a microservice architecture**
 
 This project implements the core principles from OnDemandEnv.dev's research into dynamic environment architectures. The methodology foundation comes from extensive analysis of why traditional Infrastructure as Code approaches fail and how to build systems that enable true developer autonomy.
+
+**For enterprise microservice patterns**: Runtime code runs in private subnets, with service-to-service communication through VPC PrivateLink and VPC endpoints to keep all traffic within the AWS backbone. See [Inter-Service Communication Guide](./inter-service-com.md) for complete patterns.
 
 ### **Key Methodology Articles**
 
@@ -532,13 +535,16 @@ This project implements the Infrastructure Factory as `create_environment(config
 
 ### **True Microservice Independence Through Loose Coupling**
 
-> **📖 Implementation theory: [Walking on Many Feet: Contract Branches](https://ondemandenv.dev/articles/walking-on-many-feet-contract-branches/)**
+> **📖 Implementation theory: [Walking on Many Feet: Contract Branches](https://ondemandenv.dev/articles/walking-on-many-feet-contract-branches/)**  
+> **🔗 Inter-service patterns: [Inter-Service Communication Guide](./inter-service-com.md)**
 
 ## Implementing Loose Coupling: Service Communication Patterns
 
 > **"Services interact only through APIs. No shared infrastructure dependencies, no coordinated deployments, no platform team bottlenecks."**
 
-While this reference implementation shows a single service, the architecture naturally extends to loosely-coupled multi-service systems. Here's how service communication is implemented:
+While this reference implementation shows a single service, the architecture naturally extends to loosely-coupled multi-service systems. This repository represents **one service in a microservice ecosystem**, with runtime code properly isolated in private subnets and secure communication through VPC PrivateLink.
+
+**🏗️ For complete microservice communication patterns, see [Inter-Service Communication Guide](./inter-service-com.md)**
 
 ### 1. **API-First Communication via Application Load Balancers**
 
@@ -1370,6 +1376,7 @@ This battle-tested framework provides the flexibility to manage everything from 
 - **[AI Agent Workflow Platform Architecture](https://ondemandenv.dev/articles/ai-agent-workflow-platform-architecture)** - AI-native design principles
 
 ### **Implementation Guides**
+- **[Inter-Service Communication](./inter-service-com.md)**: VPC PrivateLink & AWS managed services patterns for microservice architectures
 - **[Action Deep Dive](./.github/actions/extract-env/README.md)**: A detailed explanation of the `extract-env` action, its routing logic, and the two-level configuration model.
 - **[Initialization Guide](./INITIALIZATION.md)**: The complete step-by-step guide for the one-time project setup.
 
