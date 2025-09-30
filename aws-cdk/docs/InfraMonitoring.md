@@ -42,6 +42,8 @@ The `InfraMonitoring` construct is a crucial part of the `BackendStack`. It enca
 
 ### DocumentDB Auto-Scaling
 
+**Note:** This feature is currently disabled in the code.
+
 - This is a key feature of the monitoring construct.
 - A **Go-based Lambda function** (`DocDbAutoScalingFunction`) is created, responsible for scaling the number of DocumentDB read replicas.
 - The Lambda is triggered by a dedicated **SNS Topic** (`DocDbAutoScalingTopic`).

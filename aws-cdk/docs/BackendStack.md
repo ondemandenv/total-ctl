@@ -22,8 +22,10 @@ The `BackendStack` is responsible for deploying the containerized backend applic
 
 - **`CleanupJobScheduler` Construct**:
   - An instance of the `CleanupJobScheduler` construct is created. This sets up a scheduled task to run every 5 minutes.
-  - It uses the same container image as the main service but overrides the `command` to run `cleanup-job.ts`.
+  - It uses the same container image as the main service but overrides the `command` to run `['npx', 'tsx', 'cleanup-job.ts']`.
   - It runs in a separate security group within the VPC.
+  - It creates a separate, smaller task definition for the cleanup job (512 CPU, 1024 MiB memory).
+  - It adds a `TASK_TYPE: 'CLEANUP'` environment variable to the container.
 
 - **`InfraMonitoring` Construct**:
   - An instance of the `InfraMonitoring` construct is created, passing in all the relevant resources (Fargate service, ALB, ECS cluster, etc.) to set up comprehensive monitoring and alerting.
