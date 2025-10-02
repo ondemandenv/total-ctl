@@ -253,8 +253,8 @@ The Infrastructure Factory model directly improves all four DORA metrics that de
 **The hidden cost of Kubernetes GitOps isn't technical—it's organizational.** Most "microservice" architectures create a feudal system:
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    THE PLATFORM KINGDOM                     │
+┌──────────────────────────────────────────────────────────--───┐
+│                    THE PLATFORM KINGDOM                       │
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐ │
 │  │   Ops Lords     │  │   DBA Nobles    │  │ Security Guards │ │
 │  │ (Infrastructure)│  │  (Database)     │  │   (Secrets)     │ │
@@ -262,8 +262,8 @@ The Infrastructure Factory model directly improves all four DORA metrics that de
 │           │                     │                     │        │
 │           ▼                     ▼                     ▼        │
 │  ┌─────────────────────────────────────────────────────────────┐ │
-│  │                   Service Serfs                            │ │
-│  │        (Own code, beg for everything else)                 │ │
+│  │                   Service Serfs                             │ │
+│  │   (Own code in container, beg for everything else)          │ │
 │  └─────────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
 ```
