@@ -157,6 +157,18 @@ The Infrastructure Factory model directly improves all four DORA metrics that de
 └─────────────────────────────────────────────────────────────┘
 ```
 
+### Why the Committees Are No Longer Needed: Cloud-Native Controls
+
+The committee-driven model arose from a necessity to manage risk and complexity in on-premise data centers. However, modern cloud platforms like AWS have rendered this model obsolete by providing sophisticated, programmable controls that can be managed through code.
+
+-   **The Security Team** is replaced by **AWS IAM & VPC**. Instead of manual security reviews, you define granular permissions with IAM roles and network isolation with VPC security groups. These are version-controlled, auditable, and automatically enforced.
+-   **The DBA Team** is replaced by **Amazon RDS & DocumentDB**. Instead of waiting for a DBA to provision and tune a database, you define a fully managed database instance in your CDK code. Backups, patching, and scaling are handled by AWS, with performance metrics available via CloudWatch.
+-   **The Ops Team** is replaced by **AWS CDK & ECS/Fargate**. Instead of an ops team performing manual deployments, your infrastructure and application are deployed automatically via a CI/CD pipeline triggered by a `git push`. Serverless compute like Fargate removes the need to manage underlying servers.
+-   **The Platform Team** is replaced by **Developer-Owned Infrastructure**. The "platform" is no longer a centralized gatekeeper but a set of well-architected, reusable CDK constructs that development teams can use to build the exact infrastructure they need, when they need it.
+
+By leveraging managed services, we shift from a model of **human gatekeeping** to one of **programmatic enforcement**. The expertise that was once siloed within committees is now codified into the infrastructure itself, giving developers total control and responsibility within a safe, automated framework.
+
+
 ### The Decision Velocity Gap
 
 | Decision Type | Enterprise Committee Process | Startup Individual Action |
