@@ -8,7 +8,7 @@
 
 This project implements the core principles from OnDemandEnv.dev's research into dynamic environment architectures. The methodology foundation comes from extensive analysis of why traditional Infrastructure as Code approaches fail and how to build systems that enable true developer autonomy.
 
-**For enterprise microservice patterns**: Runtime code runs in private subnets, with service-to-service communication through VPC PrivateLink and VPC endpoints to keep all traffic within the AWS backbone. See [Inter-Service Communication Guide](./inter-service-com.md) for complete patterns.
+**For enterprise microservice patterns**: Runtime code runs in private subnets, with service-to-service communication through VPC PrivateLink and VPC endpoints to keep all traffic within the AWS backbone. See [Inter-Service Communication Guide](https://github.com/ondemandenv/total-ctl/blob/sandbox/INTER-SERVICE-COM.md) for complete patterns.
 
 ### **Key Methodology Articles**
 
