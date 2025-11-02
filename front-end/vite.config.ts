@@ -1,7 +1,7 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import mkcert from "vite-plugin-mkcert";
-import path from "path";
+import * as path from "path"
 import wasm from "vite-plugin-wasm"
 
 export default defineConfig(({ mode }) => {
